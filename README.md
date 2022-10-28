@@ -12,6 +12,6 @@ Class SupportedFeatures
       calculating college fee and updating fees paid;
       applying leaves for students and teachers;
       viewing leaves of students and teachers;
-      return;
+      return ;
   }
 }
