@@ -50,8 +50,8 @@ class Project extends JFrame implements ActionListener
                 newStudentInfo=new JMenuItem("Add New Student Information");
                 newStudentInfo.setFont(new Font("serif", Font.PLAIN, 18));
                 newStudentInfo.addActionListener(this);
-                newInformation.add(newFacultyInfo);
                 newInformation.add(newStudentInfo);
+                newInformation.add(newFacultyInfo);
 
             //creating menus for menuBar
             viewDetails = new JMenu("ViewDetails");
@@ -110,7 +110,7 @@ class Project extends JFrame implements ActionListener
             //adding menuBar to JFrame
             menuBar.add(exam);
                 //creating menuItems for menuBar
-                examinationDetails=new JMenuItem("Student Examination Details");
+                examinationDetails=new JMenuItem("Check Student Results");
                 examinationDetails.setFont(new Font("serif", Font.PLAIN, 18));
                 examinationDetails.addActionListener(this);
                 enterMarks=new JMenuItem("Enter Marks");
@@ -126,14 +126,14 @@ class Project extends JFrame implements ActionListener
             //adding menuBar to JFrame
             menuBar.add(updateInfo);
                 //creating menuItems for menuBar
-                updateFacultyInfo=new JMenuItem("Update Student Details");
+                updateFacultyInfo=new JMenuItem("Update Faculty Details");
                 updateFacultyInfo.setFont(new Font("serif", Font.PLAIN, 18));
                 updateFacultyInfo.addActionListener(this);
-                updateStudentInfo=new JMenuItem("Update Faculty Details");
+                updateStudentInfo=new JMenuItem("Update Student Details");
                 updateStudentInfo.setFont(new Font("serif", Font.PLAIN, 18));
                 updateStudentInfo.addActionListener(this);
-                updateInfo.add(updateFacultyInfo);
                 updateInfo.add(updateStudentInfo);
+                updateInfo.add(updateFacultyInfo);
             
             feeDetails = new JMenu("FeeDetails");
             feeDetails.setFont(new Font("serif", Font.BOLD, 25));
@@ -282,12 +282,12 @@ class Project extends JFrame implements ActionListener
         else if(a.getSource()==examinationDetails)
         {
             System.out.println("examinationDetails");
-            // new ExamDetails();
+            new CheckResult();
         }
         else if(a.getSource()==feeForm)
         {
             System.out.println("feeForm");
-            // new FeeForm();
+            new PayFee();
         }
         else if(a.getSource()==feeStructure)
         {
