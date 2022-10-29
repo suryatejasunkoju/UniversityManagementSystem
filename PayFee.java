@@ -27,6 +27,7 @@ class PayFee  extends JFrame implements ActionListener
     Connection c;
     Statement st;
     int paidFees=0,payableAmount=0,payingAmount=0;
+    String selectedBranch,selectedSem,selectedCourse,currRollNo,name,fatherName;
     PayFee()
     {
         this.setTitle("Pay Student Fee");
@@ -48,7 +49,7 @@ class PayFee  extends JFrame implements ActionListener
         courseLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(courseLabel);
 
-        courseComboBox=new JComboBox(getRollNoFromDB());
+        courseComboBox=new JComboBox(courseList());
         courseComboBox.setBounds(230,70,150,30);
         courseComboBox.addActionListener(this);
         this.add(courseComboBox);
@@ -58,7 +59,7 @@ class PayFee  extends JFrame implements ActionListener
         semLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(semLabel);
 
-        semComboBox=new JComboBox(getRollNoFromDB());
+        semComboBox=new JComboBox(semList());
         semComboBox.setBounds(230,110,150,30);
         semComboBox.addActionListener(this);
         this.add(semComboBox);
@@ -68,7 +69,7 @@ class PayFee  extends JFrame implements ActionListener
         nameLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(nameLabel);
 
-        nameValLabel=new JLabel("val");
+        nameValLabel=new JLabel("Not Available");
         nameValLabel.setBounds(230,150,150,30);
         nameValLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(nameValLabel);
@@ -78,7 +79,7 @@ class PayFee  extends JFrame implements ActionListener
         fatherNameLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(fatherNameLabel);
 
-        fatherNameValLabel=new JLabel("val");
+        fatherNameValLabel=new JLabel("Not Available");
         fatherNameValLabel.setBounds(230,190,150,30);
         fatherNameValLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(fatherNameValLabel);
@@ -88,7 +89,7 @@ class PayFee  extends JFrame implements ActionListener
         payableLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(payableLabel);
 
-        payableValLabel=new JLabel("Rs."+"");
+        payableValLabel=new JLabel("Not Available");
         payableValLabel.setBounds(230,230,150,30);
         payableValLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(payableValLabel);
@@ -139,108 +140,199 @@ class PayFee  extends JFrame implements ActionListener
     }
     public void actionPerformed(ActionEvent a)
     {
+        currRollNo=(String)rollNoComboBox.getSelectedItem();
+        selectedCourse=(String)courseComboBox.getSelectedItem();
+        selectedSem=(String)semComboBox.getSelectedItem();
         if(a.getSource()==cancelBtn)
         {
             this.setVisible(false);
         }
         else if(a.getSource()==payBtn)
         {
-            updateFeeIntoDB();
+            payFeeIntoDB();
         }
         else if(a.getSource()==updateFeeBtn)
         {
-            getFeeFromDB();
+            updateFeeAction();
         }
     }
-    public void getFeeFromDB() 
+    public void settingConnectionThings() 
     {
-        //when update button is pressed 
-        //we need to get studentName,fatherName with rollNo from student table
-        //we need to get feesToBePaid from fee table
-        //we need to get feesPaid from collegefee table if the row with rollNo exists.
-
-        //if current rollnO is present in  college fee, ie, he paid earlier. Then we have to retrieve how much balance he has to pay now;
-        //if current rollnO is not present in  college fee, ie,this is the first time he is paying fee
-        String currRollNo=(String)rollNoComboBox.getSelectedItem();
-        String selectedCourse=(String)courseComboBox.getSelectedItem();
-        String selectedSem=(String)semComboBox.getSelectedItem();
-        boolean isRollNoPresent=fasle;
-        String name="",fatherName="";
         try 
         {
             Class.forName("com.mysql.cj.jdbc.Driver");
             c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
             st=c.createStatement();
-            String selectAllQuery="select *from collegefee;";
-            rs=st.executeQuery(selectAllQuery); 
-            if(!rs.next())
-            {
-                // not paid fee earlier
-                //get fee to be paid from fee table and
-                //show it in payable Label
-                selectAllQuery="select "+selectedSem+"from fee;";
-                rs=st.executeQuery(selectAllQuery);
-                payableAmount=Integer.valueOf(rs.getString(1));
-                if(payingAmount>payableAmount)
-                {
-                    JOptionPane.showMessageDialog(null, "You cant pay more than applicable");
-                    return;
-                }
-                
-
-            }
-            else 
-            {
-                //paid fee earlier, so get total fee from fee table and subtract it with paid amount to get balance amount
-                selectAllQuery="select *from collegefee where rollno='"+currRollNo+"';";
-                rs=st.executeQuery(selectAllQuery);
-                rs.next();
-                paidFees=rs.getString();
-                // 
-            }
+        }
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+    public String getSelectedBranch(ResultSet rs, Statement st, String rollNo)
+    {
+        String selectQuery="select branch from student where rollNo='"+rollNo+"'";
+        try 
+        {
+            rs=st.executeQuery(selectQuery);
+            rs.next();   
+            selectQuery=rs.getString(1);//using selectQuery as temp
+            st.close();
+            return selectQuery;
         } 
         catch (Exception e) 
         {
+            JOptionPane.showMessageDialog(null, "Error in fetching Branch:/n"+e.toString());
+            return "";
+        }
+    }
+    public String[] courseList()
+    {
+        settingConnectionThings();
+        String selectQuery="select course from fee;";
+        String ans[]=null;
+        try 
+        {
+            int size=0;
+            rs=st.executeQuery(selectQuery);
+            ArrayList<String> arr=new ArrayList<>(8);
+            while(rs.next()) 
+            {
+                size++;
+                arr.add(rs.getString(1));
+            }   
+            ans=new String[size];
+            for(int i=0; i<size; i++)
+            {
+                ans[i]=arr.get(i);
+                System.out.print(ans[i]+",");
+            }
+            return ans;
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error in fetching Course:/n"+e.toString()); 
+        }
+        return ans;
+    }
+    public void updateFeeAction()
+    {
+        //when update button is pressed 
+        //we need to get studentName,fatherName with rollNo from student table
+        //we need to get feesToBePaid from fee table
+        //we need to get feesPaid from collegefee table if the row with rollNo exists.
+        settingConnectionThings();
+        // System.out.println("rollNo="+currRollNo);
+        String selectQuery="select name, fatherName from student where rollNo='"+currRollNo+"';";
+        try 
+        {
+            rs=st.executeQuery(selectQuery); 
+            rs.next(); 
+            name=rs.getString(1);
+            nameValLabel.setText(name+"");
+            fatherName=rs.getString(2);
+            fatherNameValLabel.setText(fatherName+""); 
+            // System.out.println("name="+name+"father="+fatherName);
+            c.close();
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Cannot fetch StudentName and FatherName from DB");
+        }
+        try 
+        {
+            settingConnectionThings();
+            System.out.println("rollNo="+currRollNo+",sem="+selectedSem);
+            String selectAllQuery="select *from collegefee where rollno='"+currRollNo+"' AND "+"semester='"+selectedSem+"';";
+            rs=st.executeQuery(selectAllQuery); 
             
+            if(rs.next())
+            {
+                //if current rollno is present in  college fee, ie, he paid earlier. Then we have to retrieve how much balance he has to pay now;
+                selectAllQuery="select total from collegefee where rollno='"+currRollNo+"';";
+                rs=st.executeQuery(selectAllQuery);
+                rs.next();
+                
+                payableAmount=Integer.valueOf(rs.getString(1));
+                //updating this amount in label
+                payableValLabel.setText("Rs."+payableAmount);
+            }
+            else
+            {
+                //if current rollno is not present in  college fee, ie,this is the first time he is paying fee
+                System.out.println("sem="+selectedSem+",course="+selectedCourse);
+                selectAllQuery="select "+selectedSem+" from fee where course='"+selectedCourse+"';";
+                // System.out.println("In else 1");
+                rs=st.executeQuery(selectAllQuery);
+                rs.next();
+                // System.out.println("In else 2");
+                System.out.println(rs.getString(1));
+                payableAmount=Integer.valueOf(rs.getString(1));//payableAmount=fee thats in fee table for that sem
+                payableValLabel.setText("Rs."+payableAmount);
+            }
+            c.close();
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Cannot update Payable Amount");
+            return;
+        }
+        //undrawing frame and redrawing frame.
+        this.setVisible(false);
+        this.setVisible(true);
+    }
+    public void payFeeIntoDB() 
+    {
+        try 
+        {
+            payingAmount=Integer.valueOf(payingAmountTextField.getText());   
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Only numbers are accepted in textfield");
+            return;
+        }
+        try 
+        {
+            // Class.forName("com.mysql.cj.jdbc.Driver");
+            // c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            // st=c.createStatement();
+            settingConnectionThings();
+
+            if(payingAmount>payableAmount)
+            {
+                JOptionPane.showMessageDialog(null, "You cant pay more than applicable");
+                return;
+            }
+            selectedBranch=getSelectedBranch(rs,st,currRollNo);
+            settingConnectionThings();
+            payableAmount=payableAmount-payingAmount;
+            String insertQuery="insert into collegefee values('"+currRollNo+"','"+selectedCourse+"','"+selectedBranch+"','"+selectedSem+"','"+payableAmount+"') ";
+            st.execute(insertQuery);
+            c.close();
+            JOptionPane.showMessageDialog(null, "Fee paid Successfully :)");
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Cannot Pay Fee \n"+e.getMessage());
         }
         return;    
     }
     public String[] semList() 
     {
-        String[] list={"semester1,semester2,semester3,semester4,semester5,semester6,semester7,semester8"};
+        String[] list={"semester1","semester2","semester3","semester4","semester5","semester6","semester7","semester8"};
         return list;    
-    }
-    public void updateFeeIntoDB() 
-    {
-        String empID, date, duration;
-        empID=(String)rollNoComboBox.getSelectedItem();
-        date=DateFormat.getDateInstance().format(DOB.getDate());
-        duration=(String)durationComboBox.getSelectedItem();
-        try 
-        {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-            //name varchar(30), fatherName varchar(30),rollNo varchar (10),dob varchar(40),address varchar(100),phone varchar(30),email varchar(20),classX varchar(30),classXII varchar(30),aadhar varchar(30),course varchar(30),branch varchar(30));
-            Statement st=c.createStatement();
-            String selectAllQuery="insert into studentleave values('"+empID+"','"+date+"','"+duration+"');";
-            st.execute(selectAllQuery); 
-            JOptionPane.showMessageDialog(null, "inserted Successfully");
-        }
-        catch (Exception e) 
-        {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, e.toString());
-        }
     }
     String[] getRollNoFromDB()
     {
         String[] a={};
         try 
         {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-            //name varchar(30), fatherName varchar(30),rollNo varchar (10),dob varchar(40),address varchar(100),phone varchar(30),email varchar(20),classX varchar(30),classXII varchar(30),aadhar varchar(30),course varchar(30),branch varchar(30));
-            Statement st=c.createStatement();
+            // Class.forName("com.mysql.cj.jdbc.Driver");
+            // Connection c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            // //name varchar(30), fatherName varchar(30),rollNo varchar (10),dob varchar(40),address varchar(100),phone varchar(30),email varchar(20),classX varchar(30),classXII varchar(30),aadhar varchar(30),course varchar(30),branch varchar(30));
+            // Statement st=c.createStatement();
+            settingConnectionThings();
             String selectAllQuery="select rollNo from student;";
             rs=st.executeQuery(selectAllQuery); 
             ArrayList<String> s=new ArrayList<>();
@@ -255,12 +347,16 @@ class PayFee  extends JFrame implements ActionListener
             {
                 a[i] = s.get(i);
             }
-            c.close();
+            // c.close();
+            for(String x:a)
+            {
+                System.out.print(x+",");
+            }
             return a;
         }
         catch (Exception e) 
         {
-            e.printStackTrace();
+            // e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.toString());
         }
         return a;

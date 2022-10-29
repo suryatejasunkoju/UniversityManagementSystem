@@ -26,6 +26,7 @@ class Splash extends JFrame implements Runnable
         int baseWidth=700, baseHeight=400;
         for (int j = 0; j <10; j++) 
         {
+            // this.setVisible(false);
             this.setSize(baseWidth,baseHeight);
             this.setLocationRelativeTo(null);
             try 
@@ -38,6 +39,7 @@ class Splash extends JFrame implements Runnable
             }
             baseWidth+=40;
             baseHeight+=40;
+            this.setVisible(true);
         }
         // System.out.println("baseWidth="+baseWidth+",baseHeight="+baseHeight);//baseWidth=1250,baseHeight=800
         try 

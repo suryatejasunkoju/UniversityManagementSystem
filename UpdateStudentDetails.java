@@ -170,16 +170,52 @@ class UpdateStudentDetails extends JFrame implements ActionListener
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
     }
-    public String[] getCourseList() 
+    public void settingConnectionThings() 
     {
-        String[] a={"B.Tech","B.Com","B.Sc"};
-        return a;
+        try 
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            st=c.createStatement();
+        }
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
+    public String[] courseList()
+    {
+        settingConnectionThings();
+        String selectQuery="select course from fee;";
+        String ans[]=null;
+        try 
+        {
+            int size=0;
+            rs=st.executeQuery(selectQuery);
+            ArrayList<String> arr=new ArrayList<>(8);
+            while(rs.next()) 
+            {
+                size++;
+                arr.add(rs.getString(1));
+            }   
+            ans=new String[size];
+            for(int i=0; i<size; i++)
+            {
+                ans[i]=arr.get(i);
+            }
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error in fetching Course:/n"+e.toString()); 
+        }
+        return ans;
     }
     public String[] getBranchList() 
     {
         String[] a={"Computer Science","Mechanical","Civil","IT","Electrical"};
         return a;
     }
+
     public static void main(String[] args) 
     {
         new UpdateStudentDetails();
