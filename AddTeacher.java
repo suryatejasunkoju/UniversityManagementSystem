@@ -172,6 +172,19 @@ class AddTeacher extends JFrame implements ActionListener
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
     }
+    public void settingConnectionThings() 
+    {
+        try 
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            st=c.createStatement();
+        }
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
+    }
     public static void main(String[] args) 
     {
         new AddTeacher();
@@ -224,10 +237,12 @@ class AddTeacher extends JFrame implements ActionListener
         // name+"','"+fatherName+"','"+empID+"','"+dob+"','"+address+"','"+phone+"','"+email+"','"+classX+"','"+classXII+"','"+aadhar+"','"+education+"','"+department+"');";
         try 
         {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-            // Statement st=c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-            st=c.createStatement();
+            // Class.forName("com.mysql.cj.jdbc.Driver");
+            // c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            // // Statement st=c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+            // st=c.createStatement();
+
+            settingConnectionThings();
             String insertQuery="insert into teacher values('"+name+"','"+fatherName+"','"+empID+"','"+dob+"','"+address+"','"+phone+"','"+email+"','"+classX+"','"+classXII+"','"+aadhar+"','"+education+"','"+department+"');";
             st.execute(insertQuery);  
             JOptionPane.showMessageDialog(null, "Details inserted Successfully :)");

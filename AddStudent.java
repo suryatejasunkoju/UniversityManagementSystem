@@ -9,6 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import com.toedter.calendar.JDateChooser;
 
+import java.util.ArrayList;
+
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,8 +22,8 @@ class AddStudent extends JFrame implements ActionListener
     JTextField nameField,addressField,emailField, classXIIField, courseField, fatherField,doBField, phoneField,classXField,aadharField,branchField;
     JButton submitBtn, cancleBtn; 
     JComboBox courseComboBox, branchComboBox,selectRollNo;
-    String[] coursesList={"B.Tech","B.Com","B.Sc"};
-    String[] branchesList={"Computer Science","Mechanical","Civil","IT","Electrical"};
+    // String[] coursesList={"B.Tech","B.Com","B.Sc"};
+    // String[] branchesList={"Computer Science","Mechanical","Civil","IT","Electrical"};
     JDateChooser DOB;
     ResultSet rs;
     Connection c;
@@ -86,8 +88,7 @@ class AddStudent extends JFrame implements ActionListener
         courseLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(courseLabel);
 
-        // coursesList={"B.Tech","B.Com","B.Sc"};
-        courseComboBox=new JComboBox(coursesList);
+        courseComboBox=new JComboBox(courseList());
         courseComboBox.setBounds(250,440,200,30);
         this.add(courseComboBox);
 
@@ -141,8 +142,7 @@ class AddStudent extends JFrame implements ActionListener
         branchLabel.setFont(new Font("serif", Font.PLAIN, 20));
         this.add(branchLabel);
 
-        // branchesList={"Computer Science","Mechanical","Civil","IT","Electrical"};
-        branchComboBox=new JComboBox(branchesList);
+        branchComboBox=new JComboBox(branchList());
         branchComboBox.setBounds(720,440,200,30);
         this.add(branchComboBox);
 
@@ -176,9 +176,10 @@ class AddStudent extends JFrame implements ActionListener
         //ie, even if it is not first record or any other record we have to get last record from database
         try 
         {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-            st=c.createStatement();
+            // Class.forName("com.mysql.cj.jdbc.Driver");
+            // c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            // st=c.createStatement();
+            settingConnectionThings();
             String selectQuery="Select *from student ORDER BY rollNo DESC;";
             rs=st.executeQuery(selectQuery);
             if(!rs.next())//moving cursor to first line
@@ -219,10 +220,12 @@ class AddStudent extends JFrame implements ActionListener
         // name+"','"+fatherName+"','"+empID+"','"+dob+"','"+address+"','"+phone+"','"+email+"','"+classX+"','"+classXII+"','"+aadhar+"','"+education+"','"+department+"');";
         try 
         {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
-            // Statement st=c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-            st=c.createStatement();
+            // Class.forName("com.mysql.cj.jdbc.Driver");
+            // c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            // // Statement st=c.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+            // st=c.createStatement();
+            settingConnectionThings();
+
             String insertQuery="insert into student values('"+name+"','"+fatherName+"','"+rollNo+"','"+dob+"','"+address+"','"+phone+"','"+email+"','"+classX+"','"+classXII+"','"+aadhar+"','"+course+"','"+branch+"');";
             st.execute(insertQuery);  
             JOptionPane.showMessageDialog(null, "Details inserted Successfully :)");
@@ -235,6 +238,73 @@ class AddStudent extends JFrame implements ActionListener
             JOptionPane.showMessageDialog(null, e.toString());
         }
         return;
+    }
+    public String[] branchList()
+    {
+        settingConnectionThings();
+        String selectQuery="select name from branch;";
+        String ans[]=null;
+        try 
+        {
+            int size=0;
+            rs=st.executeQuery(selectQuery);
+            ArrayList<String> arr=new ArrayList<>(8);
+            while(rs.next()) 
+            {
+                size++;
+                arr.add(rs.getString(1));
+            }   
+            ans=new String[size];
+            for(int i=0; i<size; i++)
+            {
+                ans[i]=arr.get(i);
+            }
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error in fetching Course:/n"+e.toString()); 
+        }
+        return ans;
+    }
+    public String[] courseList()
+    {
+        settingConnectionThings();
+        String selectQuery="select course from fee;";
+        String ans[]=null;
+        try 
+        {
+            int size=0;
+            rs=st.executeQuery(selectQuery);
+            ArrayList<String> arr=new ArrayList<>(8);
+            while(rs.next()) 
+            {
+                size++;
+                arr.add(rs.getString(1));
+            }   
+            ans=new String[size];
+            for(int i=0; i<size; i++)
+            {
+                ans[i]=arr.get(i);
+            }
+        } 
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error in fetching Course:/n"+e.toString()); 
+        }
+        return ans;
+    }
+    public void settingConnectionThings() 
+    {
+        try 
+        {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/universitymanagementsystem", "root", "root");
+            st=c.createStatement();
+        }
+        catch (Exception e) 
+        {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
     }
     public void actionPerformed(ActionEvent a)
     {
